@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"time"
 )
@@ -29,6 +31,21 @@ type Blockchain struct {
 	Blocks []*Block
 }
 
+func calculateHash(header BlockHeader) string {
+	// Connects information from the Header struct to create a string, data
+	data := fmt.Sprintf("%v%+v%s", header.Timestamp, header.Transactions, header.PreviousHash)
+
+	// Creates a new SHA256 instance and writes a slice (in bytes) of string data.
+	hash := sha256.New()
+	hash.Write([]byte(data))
+	hashInBytes := hash.Sum(nil)
+
+	// Converts hashInBytes to hexidecimal
+	hashString := hex.EncodeToString(hashInBytes)
+
+	return hashString
+}
+
 func CreateBlock(Transactions []Transactions, PreviousHash string) *Block {
 	// Creation of a block
 	block := &Block{
@@ -36,9 +53,10 @@ func CreateBlock(Transactions []Transactions, PreviousHash string) *Block {
 			Timestamp:    time.Now(),
 			Transactions: Transactions,
 			PreviousHash: PreviousHash,
-			Hash:         "calculate hash here",
 		},
 	}
+
+	block.Header.Hash = calculateHash(block.Header)
 
 	return block
 }
@@ -74,19 +92,12 @@ func main() {
 	// Calls the CreateBlock func and generates a new block based on the transactions struct and PreviousHash variable
 	newBlock := CreateBlock(transactions, PreviousHash)
 
-	// This calculates the hash for the new block's header.
-	newBlock.Header.Hash = calculateHash(newBlock.Header)
-
 	// Adds the block to the block chain.
 	blockchain.Blocks = append(blockchain.Blocks, newBlock)
 
 	// Verifies that the blockchain creation was a success!
 	printBlockchain(blockchain)
 
-}
-
-func calculateHash(header BlockHeader) string {
-	return "actual_calculated_hash"
 }
 
 func printBlockchain(chain *Blockchain) {
