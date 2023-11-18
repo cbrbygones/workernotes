@@ -115,6 +115,7 @@ func printBlockchain(chain *Blockchain) {
 		fmt.Printf("Timestamp: %v\n ", block.Header.Timestamp)
 		fmt.Printf("Transactions: %+v\n ", block.Header.Transactions)
 		fmt.Printf("Hash: %v\n ", block.Header.Hash)
+		fmt.Printf("Last Hash: %v\n", block.Header.PreviousHash)
 		fmt.Printf("------")
 	}
 }
