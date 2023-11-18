@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"time"
 )
@@ -32,12 +33,15 @@ type Blockchain struct {
 }
 
 func calculateHash(header BlockHeader) string {
-	// Connects information from the Header struct to create a string, data
-	data := fmt.Sprintf("%v%+v%s", header.Timestamp, header.Transactions, header.PreviousHash)
+	// Serializes the header field into a byte slice.
+	headerBytes, err := json.Marshal(header)
+	if err != nil {
+		panic(err)
+	}
 
 	// Creates a new SHA256 instance and writes a slice (in bytes) of string data.
 	hash := sha256.New()
-	hash.Write([]byte(data))
+	hash.Write(headerBytes)
 	hashInBytes := hash.Sum(nil)
 
 	// Converts hashInBytes to hexidecimal
@@ -47,12 +51,18 @@ func calculateHash(header BlockHeader) string {
 }
 
 func CreateBlock(Transactions []Transactions, PreviousHash string) *Block {
+	// Creates a new SHA256 instance/writes byte slice for the previous hash.
+	previousHashHash := sha256.New()
+	previousHashHash.Write([]byte(PreviousHash))
+	previousHashInBytes := previousHashHash.Sum(nil)
+	PreviousHashEncoded := hex.EncodeToString(previousHashInBytes)
+
 	// Creation of a block
 	block := &Block{
 		Header: BlockHeader{
 			Timestamp:    time.Now(),
 			Transactions: Transactions,
-			PreviousHash: PreviousHash,
+			PreviousHash: PreviousHashEncoded,
 		},
 	}
 
